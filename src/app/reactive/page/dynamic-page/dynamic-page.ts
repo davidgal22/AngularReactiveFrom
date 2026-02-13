@@ -1,16 +1,21 @@
 import { JsonPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { FormUtils } from '../../../utils/form-utils';
 
 @Component({
   selector: 'app-dynamic-page',
-  imports: [JsonPipe,ReactiveFormsModule],
+  imports: [JsonPipe, ReactiveFormsModule],
   templateUrl: './dynamic-page.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicPage {
-
+export class DynamicPageComponent {
   private fb = inject(FormBuilder);
   formUtils = FormUtils;
 
@@ -23,12 +28,30 @@ export class DynamicPage {
       ],
       Validators.minLength(2)
     ),
-  })
+  });
 
-  get favoriteGames():FormArray{
+  newFavorite = new FormControl('', Validators.required);
+  // newFavorite = this.fb.control([])
+
+  get favoriteGames() {
     return this.myForm.get('favoriteGames') as FormArray;
   }
 
+  onAddToFavorites() {
+    if (this.newFavorite.invalid) return;
+    const newGame = this.newFavorite.value;
 
+    this.favoriteGames.push(this.fb.control(newGame, Validators.required));
 
+    this.newFavorite.reset();
+  }
+
+  onDeleteFavorite(index: number) {
+    this.favoriteGames.removeAt(index);
+  }
+
+  onSubmit() {
+    console.log(this.myForm.value);
+    this.myForm.markAllAsTouched();
+  }
 }
